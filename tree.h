@@ -6,6 +6,8 @@
 #define FA25EC3_TREE_H
 
 #include <iostream>
+#include <queue>
+#include <stack>
 #include <string>
 #include <vector>
 using namespace std;
@@ -26,45 +28,116 @@ using namespace std;
    5. Students must create createRoot, addNode, findNode, print functions, etc.
 
    DO NOT IMPLEMENT ANYTHING HERE.
-   Only placeholders and TODO comments.
+   Only placeholders and to-do comments.
 */
 
 
-template <typename U>
-class Node {
-public:
-    string id;
-    U data;
-    vector<Node<U>*> children;
+template <typename U> class Node {
+    public:
+        string id;
+        U data;
+        vector<Node<U>*> children;
 
-    // TODO: Write constructor
-    // Node(const string &nodeID, const U &value);
+        // Write constructor
+        Node(const string &nodeID, const U &value) {
+            id = nodeID;
+            data = value;
+        }
 };
 
-template <typename T>
-class Tree {
-private:
-    Node<T>* root;
+template <typename T> class Tree {
+    private:
+        Node<T>* root;
 
-public:
-    Tree();
-    // TODO: Initialize root pointer to nullptr
+    public:
+        Tree()
+        // Initialize root pointer to nullptr
+        {root = nullptr;}
 
-    void createRoot(const string &id, const T &value);
-    // TODO: Allocate memory, assign id, assign data, set as root
+        void createRoot(const string &id, const T &value)
+        // Allocate memory, assign id, assign data, set as root
+        {root = new Node<T>(id, value);}
 
-    void addNode(const string &parentID, const string &childID, const T &value);
-    // TODO: Find parent, create child, link parent to child
-    // TODO: Support repeated children under multiple parents
+        void addNode(const string &parentID, const string &childID, const T &value)
+        // Find parent, create child, link parent to child
+        // Support repeated children under multiple parents
+        {
+            auto parent = findNode(parentID);
+            parent->children.push_back(new Node<T>(childID, value));
+        }
 
-    Node<T>* findNode(const string &id);
-    // TODO: Use DFS or BFS to search tree
+        Node<T>* findNode(const string &id)
+        // Use DFS or BFS to search tree
+        {
+            if (!root || root->id == id) return root;
+            stack<Node<T>*> s;
+            s.push(root);
+            while (!s.empty()) {
+                Node<T>* node = s.top();
+                s.pop();
+                for (int i = 0; i < node->children.size(); i++) s.push(node->children[i]);
+                if (node->data == id) return node;
+            }
+            return nullptr;
+        }
 
-    void printAll();
-    // TODO: Print entire structure in readable form
+        void printAll()
+        // Print entire structure in readable form
+        {
+            queue<Node<T>*> q;
+            q.push(root);
+            while (!q.empty()) {
+                Node<T>* node = q.front();
+                q.pop();
+                cout << node->id << "\n";
+                for (int i = 0; i < node->children.size(); i++) q.push(node->children[i]);
+            }
+        }
 
-    ~Tree();
-    // TODO: Free all allocated memory
+        // Students, implement a method in Tree<T> called playGame()
+        // This method should:
+        // 1. Start at the root node.
+        // 2. Display the current node's text.
+        // 3. Display numbered options for each child.
+        // 4. Ask the user which path to take.
+        // 5. Move to the selected child and continue until a node has no children.
+        // 6. Print an ending message.
+
+        void playGame() {
+            Node<T>* curr = root;
+            while(curr->children.size() > 0){
+                cout<<curr->id<<endl;
+                cout<<curr->data<<endl;
+                string input;
+                bool updated;
+                do{
+                    updated = false;
+                    cout<<"What do you do?"<<endl;
+                    for (auto n : curr->children) cout<<n->id<<endl;
+                    cin>>input;
+                    for (auto n : curr->children) {
+                        if (input.compare(n->id) == 0) {
+                            curr = n;
+                            updated = true;
+                            break;
+                        }
+                    }
+                }while (!updated);
+            }
+        }
+
+        ~Tree()
+        // Free all allocated memory
+        {
+            stack<Node<T>*> s;
+            s.push(root);
+            while (!s.empty()) {
+                Node<T>* node = s.top();
+                s.pop();
+                for (int i = 0; i < node->children.size(); i++) s.push(node->children[i]);
+                delete node;
+            }
+        }
 };
 
 #endif //FA25EC3_TREE_H

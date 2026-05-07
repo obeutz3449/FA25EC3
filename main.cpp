@@ -2,10 +2,6 @@
 // Created by Manju Muralidharan on 11/22/25.
 //
 
-//
-// Created by Manju Muralidharan on 11/22/25.
-//
-
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -114,15 +110,38 @@ int main() {
 
     Tree<string> adventureTree;
 
-    // TODO: Students, create the root from rawNodes[0]
-    // adventureTree.createRoot(rawNodes[0].id, rawNodes[0].text);
+    // Students, create the root from rawNodes[0]
+    // Students, add all remaining nodes
+    struct qNode {
+        StoryNodeRaw rawNode;
+        StoryNodeRaw rawParent;
+    };
 
-    // TODO: Students, add all remaining nodes
-    // for (int i = 1; i < rawNodes.size(); i++) {
-    //     adventureTree.addNode(...);
-    // }
+    adventureTree.createRoot(rawNodes[0].id, rawNodes[0].text);
+    queue<qNode> q;
+    for (int i = 0; i < rawNodes[0].children.size(); i++) {
+        for (int j = 0; j < rawNodes.size(); j++) {
+            if (rawNodes[0].children[i] == rawNodes[j].id) {
+                q.push(qNode{rawNodes[j], rawNodes[0]});
+                break;
+            }
+        }
+    }
+    while (!q.empty()) {
+        qNode qn = q.front();
+        q.pop();
+        for (int i = 0; i < qn.rawNode.children.size(); i++) {
+            for (auto & rawNode : rawNodes) {
+                if (qn.rawNode.children[i] == rawNode.id) {
+                    q.push(qNode{rawNode, qn.rawNode});
+                    break;
+                }
+            }
+        }
+        adventureTree.addNode(qn.rawParent.id, qn.rawNode.id, qn.rawNode.text);
+    }
 
-    // TODO: Students, implement a method in Tree<T> called playGame()
+    // Students, implement a method in Tree<T> called playGame()
     // This method should:
     // 1. Start at the root node.
     // 2. Display the current node's text.
@@ -137,7 +156,7 @@ int main() {
     cout << "Story loaded into your dynamic tree structure." << endl;
     cout << "Implement the Tree class to enable traversal and printing." << endl;
 
-    // TODO: Once implemented, uncomment to allow full gameplay.
-    // adventureTree.playGame();
+    // Once implemented, uncomment to allow full gameplay.
+    adventureTree.playGame();
     return 0;
 }
