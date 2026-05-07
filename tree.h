@@ -62,8 +62,12 @@ template <typename T> class Tree {
         // Find parent, create child, link parent to child
         // Support repeated children under multiple parents
         {
+            auto child = findNode(childID);
+            if (!child) child = new Node<T>(childID, value);
             auto parent = findNode(parentID);
-            parent->children.push_back(new Node<T>(childID, value));
+            if (!parent) return;
+            for (auto c : parent->children) if (c->id == child->id) return;
+            parent->children.push_back(child);
         }
 
         Node<T>* findNode(const string &id)
@@ -76,7 +80,7 @@ template <typename T> class Tree {
                 Node<T>* node = s.top();
                 s.pop();
                 for (int i = 0; i < node->children.size(); i++) s.push(node->children[i]);
-                if (node->data == id) return node;
+                if (node->id == id) return node;
             }
             return nullptr;
         }
@@ -84,12 +88,13 @@ template <typename T> class Tree {
         void printAll()
         // Print entire structure in readable form
         {
+            if (!root) return;
             queue<Node<T>*> q;
             q.push(root);
             while (!q.empty()) {
                 Node<T>* node = q.front();
                 q.pop();
-                cout << node->id << "\n";
+                cout << node->id << ": "<<node->data<<"\n";
                 for (int i = 0; i < node->children.size(); i++) q.push(node->children[i]);
             }
         }
@@ -105,38 +110,50 @@ template <typename T> class Tree {
 
         void playGame() {
             Node<T>* curr = root;
-            while(curr->children.size() > 0){
-                cout<<curr->id<<endl;
-                cout<<curr->data<<endl;
-                string input;
-                bool updated;
-                do{
-                    updated = false;
-                    cout<<"What do you do?"<<endl;
-                    for (auto n : curr->children) cout<<n->id<<endl;
-                    cin>>input;
-                    for (auto n : curr->children) {
-                        if (input.compare(n->id) == 0) {
-                            curr = n;
-                            updated = true;
-                            break;
+            while(true){
+                if (!curr) {
+                    return;
+                }
+                cout<<"["<<curr->id<<"] TEXT: "<<curr->data<<" NEXT: ";
+                for (int i = 0; i < curr->children.size(); i++) cout<<curr->children[i]->id<<(i == curr->children.size() - 1 ? "" : ", ");
+                cout<<endl;
+                if (curr->children.size() > 0) {
+                    bool updated = false;
+                    string input;
+                    do{
+                        cin>>input;
+                        for (auto n : curr->children) {
+                            if (input.compare(n->id) == 0) {
+                                curr = n;
+                                updated = true;
+                                break;
+                            }
                         }
-                    }
-                }while (!updated);
+                    }while (!updated);
+                }else return;
             }
         }
 
         ~Tree()
         // Free all allocated memory
         {
+            vector<Node<T>*> nodes;
             stack<Node<T>*> s;
             s.push(root);
             while (!s.empty()) {
                 Node<T>* node = s.top();
                 s.pop();
-                for (int i = 0; i < node->children.size(); i++) s.push(node->children[i]);
-                delete node;
+                if (!node) continue;
+                bool pushed = false;
+                for (auto n : nodes) if (n == node) {
+                    pushed = true;
+                    break;
+                }
+                if (pushed) continue;
+                nodes.push_back(node);
+                for (auto child : node->children) s.push(child);
             }
+            for (auto node : nodes) delete node;
         }
 };
 

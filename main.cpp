@@ -8,7 +8,9 @@
 #include <string>
 #include <vector>
 #include <cstdlib>
+#include <queue>
 #include "tree.h"
+
 using namespace std;
 
 /*
@@ -96,19 +98,35 @@ vector<StoryNodeRaw> parseStoryFile(const string &filename) {
 
 // Main Program
 int main() {
+    /*
     cout << "Enter your OpenAI API key: ";
     string apiKey;
     getline(cin, apiKey);
 
     string filename = runCurlToOpenAI(apiKey);
-
-    vector<StoryNodeRaw> rawNodes = parseStoryFile(filename);
+    */
+    /*
+    [1] TEXT: You stand in a forest clearing. NEXT: 2, 3
+    [2] TEXT: You follow a narrow path. NEXT: 4
+    [3] TEXT: You enter a dark cave. NEXT: 4, 5
+    [4] TEXT: You find an abandoned hut. NEXT: 6
+    [5] TEXT: A river blocks your way. NEXT: 6
+    [6] TEXT: You reach the ancient ruins. NEXT:
+    */
+    const auto rawNodes = vector<StoryNodeRaw>({
+                                                {"1", "You stand in a forest clearing.", vector<string>({"2", "3"})},
+                                                {"2", "You follow a narrow path.", vector<string>({"4"})},
+                                                {"3", "You enter a dark cave.", vector<string>({"4", "5"})},
+                                                {"4", "You find an abandoned hut.", vector<string>({"6"})},
+                                                {"5", "A river blocks your way.", vector<string>({"6"})},
+                                                {"6", "You reach the ancient ruins.", vector<string>({})}
+    }); //parseStoryFile(filename);
     if (rawNodes.empty()) {
         cerr << "Story was empty or invalid." << endl;
         return 1;
     }
 
-    Tree<string> adventureTree;
+    auto adventureTree = Tree<string>();
 
     // Students, create the root from rawNodes[0]
     // Students, add all remaining nodes
