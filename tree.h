@@ -90,13 +90,29 @@ template <typename T> class Tree {
         {
             if (!root) return;
             queue<Node<T>*> q;
+            vector<Node<T>*> nodes;
             q.push(root);
+            cout<<"===== Story Tree =====\n";
             while (!q.empty()) {
                 Node<T>* node = q.front();
                 q.pop();
-                cout << node->id << ": "<<node->data<<"\n";
-                for (int i = 0; i < node->children.size(); i++) q.push(node->children[i]);
+                bool pushed = false;
+                for (auto n : nodes) if (n == node) {
+                    pushed = true;
+                    break;
+                }
+                if (pushed) continue;
+                nodes.push_back(node);
+                cout << "Node " << node->id << ": "<<node->data<<"\n";
+                if (node->children.size() > 0) {
+                    for (int i = 0; i < node->children.size(); i++) {
+                        cout << "  Child -> " << node->children[i]->id<<endl;
+                        q.push(node->children[i]);
+                    }
+                    cout<<"\n";
+                }else cout << "  Child -> (none)" << endl;
             }
+            cout << "======================\n";
         }
 
         // Students, implement a method in Tree<T> called playGame()
@@ -109,28 +125,29 @@ template <typename T> class Tree {
         // 6. Print an ending message.
 
         void playGame() {
+            cout<<"===== Begin Adventure =====\n\n";
             Node<T>* curr = root;
             while(true){
-                if (!curr) {
-                    return;
-                }
-                cout<<"["<<curr->id<<"] TEXT: "<<curr->data<<" NEXT: ";
-                for (int i = 0; i < curr->children.size(); i++) cout<<curr->children[i]->id<<(i == curr->children.size() - 1 ? "" : ", ");
-                cout<<endl;
+                if (!curr) return;
                 if (curr->children.size() > 0) {
+                    cout<<curr->data<<"\nChoose your next action:\n";
+                    int i;
+                    for (i = 0; i < curr->children.size(); i++) cout<<(i+1)<<". "<<curr->children[i]->data<<endl;
                     bool updated = false;
                     string input;
                     do{
+                        cout<<"Selection: ";
                         cin>>input;
-                        for (auto n : curr->children) {
-                            if (input.compare(n->id) == 0) {
-                                curr = n;
-                                updated = true;
-                                break;
-                            }
+                        const int ip = stoi(input);
+                        if (ip <= i) {
+                            curr = curr->children[ip - 1];
+                            updated = true;
                         }
                     }while (!updated);
-                }else return;
+                }else{
+                    cout<<"There are no further paths.\nYour journey ends here.\n\n===== Adventure Complete =====";
+                    return;
+                }
             }
         }
 

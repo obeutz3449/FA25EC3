@@ -172,7 +172,9 @@ int main() {
     // adventureTree.playGame();
 
     cout << "Story loaded into your dynamic tree structure." << endl;
-    cout << "Implement the Tree class to enable traversal and printing." << endl;
+    cout<<endl;
+    adventureTree.printAll();
+    cout<<endl;
 
     // Once implemented, uncomment to allow full gameplay.
     adventureTree.playGame();
